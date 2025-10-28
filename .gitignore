@@ -201,8 +201,12 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+#sqlite
+*.sqlite
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
 __marimo__/
 raw_data/
+
