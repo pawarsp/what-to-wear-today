@@ -17,7 +17,8 @@ COPY api api
 # Make directories that we need, but that are not included in the COPY
 COPY raw_data /raw_data
 COPY models /models
-
+COPY setup.py /setup.py
+RUN pip install -e .
 # COPY credentials.json credentials.json
 
 # TODO: to speed up, you can load your model from MLFlow or Google Cloud Storage at startup using
