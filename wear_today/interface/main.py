@@ -3,8 +3,9 @@ import numpy as np
 import pandas as pd
 from transformers import pipeline
 from pathlib import Path
-from wear_today.params import *
-from wear_today.data import *
+from wear_today.ml_logic.params import *
+from wear_today.ml_logic.data import *
+from wear_today.ml_logic.weather_sentence import weather_sentence
 
 
 class TemperatureRecommender():
