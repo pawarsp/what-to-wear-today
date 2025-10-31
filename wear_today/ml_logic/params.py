@@ -11,3 +11,4 @@ METEO_VARIABLES = ["temperature_2m",
                    "cloud_cover",
                    "pressure_msl"]
 RAW_DATA_PATH = os.path.join(os.path.expanduser('~'), "code", "pawarsp", "what-to-wear-today", "raw_data")
+DIR_PREPROC_CLOTHES = "sample_data"
