@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import openmeteo_requests
 import requests_cache
+from pathlib import Path
 from retry_requests import retry
 from .utils import get_coords_from_location_name, get_timezone_from_coords
 from .params import *
