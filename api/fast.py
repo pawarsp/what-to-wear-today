@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
+from wear_today.ml_logic.data import *
 
 app = FastAPI()
 #TODO: Define how to load the model
