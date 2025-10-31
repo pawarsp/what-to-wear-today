@@ -180,3 +180,14 @@ class TemperatureRecommender():
                 })
 
         return pd.DataFrame(recommendations)
+
+if __name__ == '__main__':
+    model = TemperatureRecommender()
+    model.load_data()
+    input = {"time":  [datetime.now() + timedelta(hours=i) for i in range(6)],
+            "humidity": [60, 50, 50, 50, 60, 70],
+            "temperature": [11, 11, 12, 12, 13, 13],
+            "wind": [15, 16, 18, 20, 22, 30],
+            "rain": [0, 0, 0, 0, 1.0, 1.5]}
+    df = pd.DataFrame(input)
+    model.recommend(df, top_k=1, sample_size=10)
