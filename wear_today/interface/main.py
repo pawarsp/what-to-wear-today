@@ -137,8 +137,7 @@ class TemperatureRecommender():
 
         # give recommendations for top, bottom, shoes, and accessories
         recommendations = []
-        #for clo_cat in self.df_clothes.category_type.unique():
-        for clo_cat in ["Shoes"]:
+        for clo_cat in self.df_clothes.category_type.unique():
             mask = self.df_clothes["category_type"] == clo_cat
             wardrobe = self.df_clothes[mask]
             # RANDOM SAMPLE - This is the key speed improvement!
