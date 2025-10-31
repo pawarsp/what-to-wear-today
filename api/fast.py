@@ -2,8 +2,11 @@
 #from wear_today.main import predict
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 
 app = FastAPI()
+#TODO: Define how to load the model
+#app.state.model = load_model()
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,16 +25,19 @@ def root():
 
 # Endpoint for https://your-domain.com/predict?input_one=154&input_two=199
 @app.get("/predict")
-def get_predict(input_one: float = 1.0,
-            input_two: float = 2.0):
-    # TODO: Do something with your input
-    # i.e. feed it to your model.predict, and return the output
-    # For a dummy version, just return the sum of the two inputs and the original inputs
-    prediction = float(input_one) + float(input_two)
-    return {
-        'prediction': prediction,
-        'inputs': {
-            'input_one': input_one,
-            'input_two': input_two
-        }
-    }
+def predict(city:str):
+
+    # TODO: feed it to your model.predict, and return the output
+
+    X_pred = dict(
+        day=str(datetime.today().date()),
+        city=city)
+       # index=[0])
+
+    # model = load_model() #function to be confirmed
+    # assert model is not None
+
+    y_pred = X_pred['day']
+    #app.state.model.predict(X_pred)
+
+    return f" Today is {y_pred} and the forecast for {city} is: "
