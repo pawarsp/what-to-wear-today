@@ -13,7 +13,6 @@ def get_coords_from_location_name(location: str = "Berlin, Germany"):
         location = geolocator.geocode("Berlin, Germany")
     return (location.latitude, location.longitude)
 
-
 def get_timezone_from_coords(latitude, longitude):
     tf = TimezoneFinder()
     tz_name = tf.timezone_at(lat=latitude, lng=longitude)

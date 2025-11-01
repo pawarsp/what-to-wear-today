@@ -42,3 +42,4 @@ def predict(city:str):
     #app.state.model.predict(X_pred)
 
     return f" Today is {y_pred} and the forecast for {city} is: "
+
