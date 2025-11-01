@@ -74,13 +74,21 @@ def get_meteo_data_with_cache(
             df.to_csv(filepath, index=False)
     return df
 
+
+def get_input_weather_data():
+    """
+    Function to get 2 week time series weather data required for weather prediction
+    """
+    pass
+
+
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Clean raw data by
     - filling missing data with interpolated data
     """
 
-    #Interpolate missing data
+    # Interpolate missing data
     df = fill_missing_timestamps(df)
 
     print("✅ data cleaned")
@@ -88,31 +96,24 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def fill_missing_timestamps(df:pd.DataFrame)->pd.DataFrame:
-    '''
+def fill_missing_timestamps(df: pd.DataFrame) -> pd.DataFrame:
+    """
     Check if some rows are missing; fill them with linear interpolation and return
     the full dataframe.
-    '''
-    #Set date to index to build a date range with full datetime
-    df.set_index('date',inplace = True, drop = True)
-    full_index = pd.date_range(start=df.index.min(),
-                           end=df.index.max(),
-                           freq='h')
+    """
+    # Set date to index to build a date range with full datetime
+    df.set_index("date", inplace=True, drop=True)
+    full_index = pd.date_range(start=df.index.min(), end=df.index.max(), freq="h")
 
-    #Detect the missing timestamps
+    # Detect the missing timestamps
     missing_timestamps = full_index.difference(df.index)
 
-    #Define new indices for our df with the whol list of indices and
-    #interpolate missing values
+    # Define new indices for our df with the whol list of indices and
+    # interpolate missing values
     df = df.reindex(full_index)
-    df= df.interpolate(method='linear')
-    df.index.name = 'date'
+    df = df.interpolate(method="linear")
+    df.index.name = "date"
     if len(missing_timestamps) != 0:
         print(f"{len(missing_timestamps)} missing timestamp(s) interpolated")
-    #Return the cleaned dataframe and put back 'date' as a column
-    return df.reset_index().rename(columns={'index': 'date'})
-
-
-
-
-
+    # Return the cleaned dataframe and put back 'date' as a column
+    return df.reset_index().rename(columns={"index": "date"})
