@@ -23,7 +23,6 @@ class WeatherPredictor:
         self.location = location
         self.today = today
 
-
     def describe_now(self):
         date_str = self.today.strftime("%A %d %B %Y")
         time_str = self.today.strftime("%H:%M:%S")
@@ -35,41 +34,50 @@ class WeatherPredictor:
     def load_and_clean_last_data(self, input_hours=INPUT_LENGTH) -> pd.DataFrame:
         '''
         Load latest data for input_length/24 days before today
+        Return a clean dataset and the last known timestamp
         '''
-        #Convert nb of hours from input_hours into nb of inopout days to load
-        input_length_days = input_hours // 24   + 1* (input_hours % 24 >0)
+        # Convert nb of hours from input_hours into nb of inopout days to load
+        input_length_days = input_hours // 24 + 1 * (input_hours % 24 > 0)
 
-        start_date = str(self.today.date() - timedelta(days = input_length_days))
+        start_date = str(self.today.date() - timedelta(days=input_length_days))
         end_date = str(self.today.date())
         location = self.location
 
-        #Load Data from Open Meteo API and clean
+        # Load Data from Open Meteo API and clean
         df_weather = get_meteo_data_with_cache(start_date, end_date, location)
         df_weather_cleaned = clean_data(df_weather)
 
-        #Filter Data to only keep data up to the last hour
-        latitude, longitude = get_coords_from_location_name(location= "Berlin, Germany")
+        # Filter Data to only keep data up to the last hour
+        latitude, longitude = get_coords_from_location_name(
+            location="Berlin, Germany")
         input_timezone = get_timezone_from_coords(latitude, longitude)
 
-        #Check if date is UTC or timezone formatted
+        # Check if date is UTC or timezone formatted
         if df_weather_cleaned["date"].dt.tz is None:
             # tz-naive → localize it
-            df_weather_cleaned["date"] = df_weather_cleaned["date"].dt.tz_localize("UTC")
+            df_weather_cleaned["date"] = df_weather_cleaned["date"].dt.tz_localize(
+                "UTC")
         else:
             # tz-aware → convert it to the target timezone if needed
-            df_weather_cleaned["date"] = df_weather_cleaned["date"].dt.tz_convert(input_timezone)
+            df_weather_cleaned["date"] = df_weather_cleaned["date"].dt.tz_convert(
+                input_timezone)
 
-        df_weather_cleaned = df_weather_cleaned[df_weather_cleaned.date <= pd.Timestamp.now(tz=input_timezone)]
-        #####Note : using pd.Timestamp.now(tz=input_timezone) is not really good since pd.Timestamp.now()
-        #will be different than today's input...we could check that later and maybe place UTC in the input
-        #and replace pd.Timestamp.now(tz=input_timezone) by self.today
+        df_weather_cleaned = df_weather_cleaned[df_weather_cleaned.date <= pd.Timestamp.now(
+            tz=input_timezone)]
+        # Note : using pd.Timestamp.now(tz=input_timezone) is not really good since pd.Timestamp.now()
+        # will be different than today's input...we could check that later and maybe place UTC in the input
+        # and replace pd.Timestamp.now(tz=input_timezone) by self.today
 
-
-        #Filter Data to only keep last #input_hours hours of data
+        # Filter Data to only keep last #input_hours hours of data
         df_weather_filtered = df_weather_cleaned.iloc[-input_hours:, :]
 
-        return df_weather_filtered
+        # Keep the last known date in memory and return it
+        last_known_date = df_weather_filtered['date'].iloc[-1]
 
+        # import ipdb
+        # ipdb.set_trace()
+
+        return df_weather_filtered, last_known_date
 
     def load_model(self):
         '''Get the latest model of the weather predictor.
@@ -77,13 +85,13 @@ class WeatherPredictor:
         '''
 
         # Get the latest model version name by the timestamp
-        #import ipdb; ipdb.set_trace()
+        # import ipdb; ipdb.set_trace()
 
         current_file = Path(__file__).resolve()
         root_dir = current_file.parent.parent.parent
-        model_dir= os.path.join(root_dir, MODELS_DIRECTORY)
+        model_dir = os.path.join(root_dir, MODELS_DIRECTORY)
 
-        #model_directory = MODELS_DIRECTORY
+        # model_directory = MODELS_DIRECTORY
         model_paths = glob.glob(os.path.join(model_dir, "weather_predictor*"))
         print("Searching models in:", model_dir)
         print("Found models:", model_paths)
@@ -96,7 +104,7 @@ class WeatherPredictor:
         print(Fore.BLUE + "\nLoad latest weather forecast model from Docker image..." + Style.RESET_ALL)
 
         latest_model = load_model(most_recent_model_path, compile=True,
-                   custom_objects={'mse': losses.MeanSquaredError()})
+                                  custom_objects={'mse': losses.MeanSquaredError()})
 
         print("✅ Model loaded from Docker image")
 
@@ -111,8 +119,10 @@ class WeatherPredictor:
         df = raw_data.copy()
         weather_date = pd.to_datetime(df["date"])
 
-        df["day_of_year_sin"] = np.sin(2 * np.pi * weather_date.dt.dayofyear / 365)
-        df["day_of_year_cos"] = np.cos(2 * np.pi * weather_date.dt.dayofyear / 365)
+        df["day_of_year_sin"] = np.sin(
+            2 * np.pi * weather_date.dt.dayofyear / 365)
+        df["day_of_year_cos"] = np.cos(
+            2 * np.pi * weather_date.dt.dayofyear / 365)
         df["day_of_week_sin"] = np.sin(2 * np.pi * weather_date.dt.weekday / 7)
         df["day_of_week_cos"] = np.cos(2 * np.pi * weather_date.dt.weekday / 7)
         df["hour_sin"] = np.sin(2 * np.pi * weather_date.dt.hour / 24)
@@ -140,10 +150,11 @@ class WeatherPredictor:
         # Load scaler
         scaler_y = self.load_scaler()
         if scaler_y is None:
-            raise ValueError("No scaler found. Please train a model and save the scaler first.")
+            raise ValueError(
+                "No scaler found. Please train a model and save the scaler first.")
 
         # Load and preprocess latest data
-        df_clean = self.load_and_clean_last_data()
+        df_clean, last_known_timestamp = self.load_and_clean_last_data()
         df_processed = self.preprocessing(df_clean)
 
         # Predict
@@ -155,15 +166,29 @@ class WeatherPredictor:
             y_pred_scaled.reshape(-1, N_TARGETS)
         ).reshape(y_pred_scaled.shape)
 
-        #Format the output
+        # Format the output
         df_pred = pd.DataFrame(
             y_pred_original,
             columns=TARGET
         )
 
-        #Add the date dimension --> to do
+        # Add the date dimension --> to do
+        next_hours = [last_known_timestamp +
+                      timedelta(hours=i) for i in range(1, OUTPUT_LENGTH + 1)]
 
-        print(Fore.GREEN + f"✅ Prediction completed with shape {y_pred_original.shape}" + Style.RESET_ALL)
+        df_pred.insert(0, 'time', next_hours)
+
+        # Redefine the columns order to fit with the expected recommender model input
+        df_pred = df_pred.rename(columns={'temperature_2m': 'temperature',
+                                'relative_humidity_2m': 'humidity',
+                                'rain': 'rain',
+                                'wind_speed_10m': 'wind'
+                                }
+                       )
+        df_pred = df_pred[['time', 'humidity', 'temperature', 'wind', 'rain']]
+
+        print(
+            Fore.GREEN + f"✅ Prediction completed with shape {y_pred_original.shape}" + Style.RESET_ALL)
 
         return df_pred
 
@@ -179,17 +204,19 @@ class WeatherPredictor:
         # Get the latest scaler version name by the timestamp
         current_file = Path(__file__).resolve()
         root_dir = current_file.parent.parent.parent
-        model_dir= os.path.join(root_dir, MODELS_DIRECTORY)
+        model_dir = os.path.join(root_dir, MODELS_DIRECTORY)
 
         scaler_directory = os.path.join(root_dir, MODELS_DIRECTORY)
-        scaler_paths = glob.glob(os.path.join(scaler_directory, "weather_y_scaler*"))
+        scaler_paths = glob.glob(os.path.join(
+            scaler_directory, "weather_y_scaler*"))
 
         if not scaler_paths:
             return None
 
         most_recent_scaler_path = sorted(scaler_paths)[-1]
 
-        print(Fore.BLUE + "\nLoad latest target scaler from Docker image..." + Style.RESET_ALL)
+        print(
+            Fore.BLUE + "\nLoad latest target scaler from Docker image..." + Style.RESET_ALL)
 
         latest_scaler = joblib.load(most_recent_scaler_path)
 
@@ -197,14 +224,11 @@ class WeatherPredictor:
 
         return latest_scaler
 
-
     def save_scaler(self):
         pass
 
 
-
-
 if __name__ == "__main__":
-    predictor = WeatherPredictor() #ensuite tester en changeant date
+    predictor = WeatherPredictor()  # ensuite tester en changeant date
     predictions = predictor.predict()
     print(predictions)
