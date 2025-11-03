@@ -1,7 +1,11 @@
-"""Clothing Recommender Class"""
+import os
+import pandas as pd
+from transformers import pipeline
+import tensorflow as tf
+import torch
 
 
-class TemperatureRecommender:
+class TemperatureRecommender:"""Clothing Recommender Class"""
     def __init__(
         self, model_name="facebook/bart-large-mnli", cache_dir="./model_cache"
     ):
@@ -81,9 +85,17 @@ class TemperatureRecommender:
         """
         Convert numeric temperature to label
         """
+        temperature_mapping = {
+            (5, 10): "5-10°C cold weather",
+            (10, 15): "10-15°C cool weather",
+            (15, 20): "15-20°C mild weather",
+            (20, 25): "20-25°C warm weather",
+            (25, 30): "25-30°C hot weather"
+        }
+
         try:
             temp = float(temperature)
-            for (low, high), label in self.temperature_mapping.items():
+            for (low, high), label in temperature_mapping.items():
                 if low <= temp <= high:
                     return label
             if temp < 5:
