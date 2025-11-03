@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 
-def get_coords_from_location_name(location: str = "Berlin, Germany"):
+def get_coords_from_location_name(location: str = "Berlin, Germany", timeout: int = 5):
     """
     Translates place name like "Berlin, Germany" into (latitude, longitude)
     """
     geolocator = Nominatim(user_agent="my_geocoder")
-    location = geolocator.geocode(location)
+    location = geolocator.geocode(location, timeout=timeout)
     if location is None:
         print("Location could not be resolved. Using 'Berlin, Germany' instead.")
         location = geolocator.geocode("Berlin, Germany")
