@@ -146,13 +146,14 @@ class WeatherPredictor:
         # Load model
         model = self.load_model()
         if model is None:
-            raise ValueError("No model found. Please train a model first.")
+            print(f"\n❌ No model found. Please train a model first.")
+            return None
 
         # Load scaler
         scaler_y = self.load_scaler()
         if scaler_y is None:
-            raise ValueError(
-                "No scaler found. Please train a model and save the scaler first.")
+            print(f"\n❌ No scaler found. Please train a model and save the scaler first.")
+            return None
 
         # Load and preprocess latest data
         df_clean, last_known_timestamp = self.load_and_clean_last_data()
@@ -230,6 +231,7 @@ class WeatherPredictor:
 
 
 if __name__ == "__main__":
-    predictor = WeatherPredictor()  # ensuite tester en changeant date
+    predictor = WeatherPredictor(location = 'Marseille, France')  # ensuite tester en changeant date
     predictions = predictor.predict()
-    print(predictions)
+    if predictions is not None:
+        print(predictions)
