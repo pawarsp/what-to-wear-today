@@ -92,7 +92,8 @@ class WeatherPredictor:
         model_dir = os.path.join(root_dir, MODELS_DIRECTORY)
 
         # model_directory = MODELS_DIRECTORY
-        model_paths = glob.glob(os.path.join(model_dir, "weather_predictor*"))
+        base_model_filename = f"weather_predictor_{self.location.replace(', ', '_')}*"
+        model_paths = glob.glob(os.path.join(model_dir, base_model_filename))
         print("Searching models in:", model_dir)
         print("Found models:", model_paths)
 
@@ -180,11 +181,11 @@ class WeatherPredictor:
 
         # Redefine the columns order to fit with the expected recommender model input
         df_pred = df_pred.rename(columns={'temperature_2m': 'temperature',
-                                'relative_humidity_2m': 'humidity',
-                                'rain': 'rain',
-                                'wind_speed_10m': 'wind'
-                                }
-                       )
+                                          'relative_humidity_2m': 'humidity',
+                                          'rain': 'rain',
+                                          'wind_speed_10m': 'wind'
+                                          }
+                                 )
         df_pred = df_pred[['time', 'humidity', 'temperature', 'wind', 'rain']]
 
         print(
@@ -204,11 +205,11 @@ class WeatherPredictor:
         # Get the latest scaler version name by the timestamp
         current_file = Path(__file__).resolve()
         root_dir = current_file.parent.parent.parent
-        model_dir = os.path.join(root_dir, MODELS_DIRECTORY)
 
         scaler_directory = os.path.join(root_dir, MODELS_DIRECTORY)
+        base_scaler_filename = f"weather_y_scaler_{self.location.replace(', ', '_')}*"
         scaler_paths = glob.glob(os.path.join(
-            scaler_directory, "weather_y_scaler*"))
+            scaler_directory, base_scaler_filename))
 
         if not scaler_paths:
             return None
