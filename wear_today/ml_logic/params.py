@@ -7,7 +7,7 @@ METEO_VARIABLES = [
     "relative_humidity_2m",
     "dew_point_2m",
     "apparent_temperature",
-    "precipitation",
+    "rain",
     "wind_speed_10m",
     "cloud_cover",
     "pressure_msl",

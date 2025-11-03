@@ -231,7 +231,7 @@ class WeatherPredictor:
 
 
 if __name__ == "__main__":
-    predictor = WeatherPredictor(location = 'Marseille, France')  # ensuite tester en changeant date
+    predictor = WeatherPredictor(location = 'Berlin, Germany')  # ensuite tester en changeant date
     predictions = predictor.predict()
     if predictions is not None:
         print(predictions)
