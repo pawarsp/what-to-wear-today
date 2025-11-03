@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
-from wear_today.interface.main import recommend_cloths
+from wear_today.interface.main import recommend_clothes_for_today
 
 app = FastAPI()
 # TODO: Define how to load the model
@@ -36,7 +36,7 @@ def predict(city: str):
     # index=[0])
     # model = load_model() #function to be confirmed
     # assert model is not None
-    weather_prediction, recommended_clothing = recommend_cloths_for_today(
+    weather_prediction, recommended_clothing = recommend_clothes_for_today(
         city=city, today=datetime.today().date()
     )
     # y_pred = X_pred['day']
