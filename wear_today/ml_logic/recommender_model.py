@@ -5,7 +5,8 @@ import tensorflow as tf
 import torch
 
 
-class TemperatureRecommender:"""Clothing Recommender Class"""
+class TemperatureRecommender:
+    """Clothing Recommender Class"""
     def __init__(
         self, model_name="facebook/bart-large-mnli", cache_dir="./model_cache"
     ):
@@ -199,3 +200,8 @@ class TemperatureRecommender:"""Clothing Recommender Class"""
                 )
 
         return pd.DataFrame(recommendations)
+
+
+if __name__ == "__main__":
+    recommender = TemperatureRecommender()
+
