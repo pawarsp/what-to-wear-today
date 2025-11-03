@@ -50,6 +50,15 @@ class WeatherPredictor:
         #Filter Data to only keep data up to the last hour
         latitude, longitude = get_coords_from_location_name(location= "Berlin, Germany")
         input_timezone = get_timezone_from_coords(latitude, longitude)
+
+        #Check if date is UTC or timezone formatted
+        if df_weather_cleaned["date"].dt.tz is None:
+            # tz-naive → localize it
+            df_weather_cleaned["date"] = df_weather_cleaned["date"].dt.tz_localize("UTC")
+        else:
+            # tz-aware → convert it to the target timezone if needed
+            df_weather_cleaned["date"] = df_weather_cleaned["date"].dt.tz_convert(input_timezone)
+
         df_weather_cleaned = df_weather_cleaned[df_weather_cleaned.date <= pd.Timestamp.now(tz=input_timezone)]
         #####Note : using pd.Timestamp.now(tz=input_timezone) is not really good since pd.Timestamp.now()
         #will be different than today's input...we could check that later and maybe place UTC in the input
