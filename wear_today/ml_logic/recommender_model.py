@@ -9,7 +9,7 @@ from params import *
 from utils import *
 
 
-class TemperatureRecommender:
+class ClothingRecommender:
     """Clothing Recommender Class"""
     def __init__(
         self, model_name="facebook/bart-large-mnli"):
@@ -19,7 +19,7 @@ class TemperatureRecommender:
 
         current_file = Path(__file__).resolve()
         root_dir = current_file.parent.parent.parent
-        self.cache_dir= os.path.join(root_dir, "models")
+        self.cache_dir= os.path.join(root_dir, MODEL_DIR)
         os.makedirs(self.cache_dir, exist_ok=True)
 
     def load_data(self):
@@ -218,7 +218,7 @@ if __name__ == "__main__":
         "rain": [0, 0, 0, 0, 1.0, 1.5],
     }
     df = pd.DataFrame(input)
-    recommender = TemperatureRecommender()
+    recommender = ClothingRecommender()
     recommender.load_data()
     recommender.initialize_classifier()
     #recommendations = recommender.recommend(df)

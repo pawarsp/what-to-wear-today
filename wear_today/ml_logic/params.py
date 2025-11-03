@@ -16,3 +16,4 @@ RAW_DATA_PATH = os.path.join(
     os.path.expanduser("~"), "code", "pawarsp", "what-to-wear-today", "raw_data"
 )
 DIR_PREPROC_CLOTHES = "sample_data"
+MODEL_DIR = "models"
