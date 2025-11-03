@@ -1,16 +1,10 @@
 import os
 import pandas as pd
-from transformers import pipeline
-import tensorflow as tf
-import torch
-from datetime import datetime, timedelta
-from pathlib import Path
-from params import *
-from utils import *
+
+"""Clothing Recommender Class"""
 
 
-class ClothingRecommender:
-    """Clothing Recommender Class"""
+class TemperatureRecommender:
     def __init__(
         self, model_name="facebook/bart-large-mnli"):
         self.model_name = model_name
