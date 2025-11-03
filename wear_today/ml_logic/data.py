@@ -21,7 +21,13 @@ def get_meteo_data_with_cache(
 
     latitude, longitude = get_coords_from_location_name(location)
     timezone = get_timezone_from_coords(latitude, longitude)
-    filepath = Path(RAW_DATA_PATH).joinpath(
+    
+    current_file = Path(__file__).resolve()
+    root_dir = current_file.parent.parent.parent
+    data_dir= os.path.join(root_dir, "raw_data")
+    
+
+    filepath = Path(data_dir).joinpath(
         f'{location.replace(", ", "_").lower()}_{start_date.replace("-", "")}_{end_date.replace("-", "")}.csv'
     )
 

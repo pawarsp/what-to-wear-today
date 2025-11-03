@@ -177,7 +177,11 @@ class WeatherPredictor:
         '''
 
         # Get the latest scaler version name by the timestamp
-        scaler_directory = MODELS_DIRECTORY
+        current_file = Path(__file__).resolve()
+        root_dir = current_file.parent.parent.parent
+        model_dir= os.path.join(root_dir, MODELS_DIRECTORY)
+
+        scaler_directory = os.path.join(root_dir, MODELS_DIRECTORY)
         scaler_paths = glob.glob(os.path.join(scaler_directory, "weather_y_scaler*"))
 
         if not scaler_paths:
