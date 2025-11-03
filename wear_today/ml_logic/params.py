@@ -17,7 +17,6 @@ RAW_DATA_PATH = os.path.join(
 )
 DIR_PREPROC_CLOTHES = "sample_data"
 
-
 ####WEATHER MODEL PARAMS#########
 MODELS_DIRECTORY = "models"
 

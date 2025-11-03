@@ -6,29 +6,32 @@ import pandas as pd
 
 class TemperatureRecommender:
     def __init__(
-        self, model_name="facebook/bart-large-mnli", cache_dir="./model_cache"
-    ):
+        self, model_name="facebook/bart-large-mnli"):
         self.model_name = model_name
-        self.cache_dir = cache_dir
         self.classifier = None
         self.clothing_df = None
 
-        # Create cache directory
+        current_file = Path(__file__).resolve()
+        root_dir = current_file.parent.parent.parent
+        self.cache_dir= os.path.join(root_dir, MODEL_DIR)
         os.makedirs(self.cache_dir, exist_ok=True)
 
     def load_data(self):
         """
         Load clothing data
         """
+        current_file = Path(__file__).resolve()
+        encoding_data_path = os.path.join(current_file.parent.parent, DIR_PREPROC_CLOTHES)
+        
         df_accessories = pd.read_csv(
-            os.path.join(DIR_PREPROC_CLOTHES, "classified_accessories.csv")
+            os.path.join(encoding_data_path, "classified_accessories.csv")
         )
         df_shoes = pd.read_csv(
-            os.path.join(DIR_PREPROC_CLOTHES, "classified_shoes.csv")
+            os.path.join(encoding_data_path, "classified_shoes.csv")
         )
-        df_tops = pd.read_csv(os.path.join(DIR_PREPROC_CLOTHES, "classified_top.csv"))
+        df_tops = pd.read_csv(os.path.join(encoding_data_path, "classified_top.csv"))
         df_bottoms = pd.read_csv(
-            os.path.join(DIR_PREPROC_CLOTHES, "classified_bottom.csv")
+            os.path.join(encoding_data_path, "classified_bottom.csv")
         )
 
         self.df_clothes = pd.concat((df_accessories, df_shoes, df_tops, df_bottoms))
@@ -84,9 +87,17 @@ class TemperatureRecommender:
         """
         Convert numeric temperature to label
         """
+        temperature_mapping = {
+            (5, 10): "5-10°C cold weather",
+            (10, 15): "10-15°C cool weather",
+            (15, 20): "15-20°C mild weather",
+            (20, 25): "20-25°C warm weather",
+            (25, 30): "25-30°C hot weather"
+        }
+
         try:
             temp = float(temperature)
-            for (low, high), label in self.temperature_mapping.items():
+            for (low, high), label in temperature_mapping.items():
                 if low <= temp <= high:
                     return label
             if temp < 5:
@@ -190,3 +201,19 @@ class TemperatureRecommender:
                 )
 
         return pd.DataFrame(recommendations)
+
+
+if __name__ == "__main__":
+    input = {
+        "time": [datetime.now() + timedelta(hours=i) for i in range(6)],
+        "humidity": [60, 50, 50, 50, 60, 70],
+        "temperature": [11, 11, 12, 12, 13, 13],
+        "wind": [15, 16, 18, 20, 22, 30],
+        "rain": [0, 0, 0, 0, 1.0, 1.5],
+    }
+    df = pd.DataFrame(input)
+    recommender = ClothingRecommender()
+    recommender.load_data()
+    recommender.initialize_classifier()
+    #recommendations = recommender.recommend(df)
+
