@@ -4,16 +4,38 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 
-def get_coords_from_location_name(location: str = "Berlin, Germany"):
+def get_coords_from_location_name(location: str = "Berlin, Germany", timeout: int = 5):
     """
     Translates place name like "Berlin, Germany" into (latitude, longitude)
     """
     geolocator = Nominatim(user_agent="my_geocoder")
-    location = geolocator.geocode(location)
+    location = geolocator.geocode(location, timeout=timeout)
     if location is None:
         print("Location could not be resolved. Using 'Berlin, Germany' instead.")
         location = geolocator.geocode("Berlin, Germany")
     return (location.latitude, location.longitude)
+
+def get_coords_from_location_name_dummy(location: str = "Berlin, Germany"):
+    """
+    Returns the coordinates (lat, lon) of a known city among a hard coded
+    dictionnary
+    If the city is not found, returns None and prints a warning message.
+    """
+    # Internal dictionary of coordinates
+    city_coords = {
+        "Berlin, Germany": {"lat": 52.5200, "lon": 13.4050},
+        "Marseille, France": {"lat": 43.2965, "lon": 5.3698},
+        "Porto, Portugal": {"lat": 41.1579, "lon": -8.6291},
+        "London, United Kingdom": {"lat": 51.5074, "lon": -0.1278}
+    }
+
+    coords = city_coords.get(location)
+    if coords:
+        return coords["lat"], coords["lon"]
+    else:
+        print(f"⚠️ City '{location}' not found.")
+        print(f"Available cities: {', '.join(city_coords.keys())}")
+        return None
 
 
 def get_timezone_from_coords(latitude, longitude):
