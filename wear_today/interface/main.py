@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import datetime
 from wear_today.ml_logic.params import *
 from wear_today.ml_logic.data import *
-from wear_today.ml_logic.recommender_model import TemperatureRecommender
+from wear_today.ml_logic.recommender_model import ClothingRecommender
 from wear_today.ml_logic.weather_model import WeatherPredictor
 
 
@@ -15,7 +15,7 @@ def recommend_clothes_for_today(city="Berlin, Germany", today=datetime.now()):
     # obtain clothing recommendation
     print(f"Gathering clothing recommendation for {city}")
     weather_predictor = WeatherPredictor(location = city, today = today)
-    clothing_recommender = TemperatureRecommender()
+    clothing_recommender = ClothingRecommender()
     clothing_recommender.load_data()
     weather_prediction = weather_predictor.predict()
     recommended_clothing = clothing_recommender.recommend(weather_prediction, top_k=1, sample_size=10)
