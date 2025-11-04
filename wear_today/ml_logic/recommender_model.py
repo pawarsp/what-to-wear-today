@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime, timedelta
@@ -16,6 +15,7 @@ class ClothingRecommender:
         self.model_name = model_name
         self.classifier = None
         self.clothing_df = None
+        self.embedder = None
 
         current_file = Path(__file__).resolve()
         root_dir = current_file.parent.parent.parent
@@ -53,7 +53,7 @@ class ClothingRecommender:
             return self
 
         model_path = os.path.join(self.cache_dir, "all-MiniLM-L6-v2")
-
+        print(model_path)
         if os.path.exists(model_path):
             print("📂 Loading cached model...")
             try:
@@ -163,7 +163,7 @@ class ClothingRecommender:
                         "product name:",
                         row["product_name"],
                         "; keywords:",
-                        row["text"],
+                        row["text_complex"],
                         "; suitable for",
                         row["weather_label"],
                     ]
@@ -212,5 +212,5 @@ if __name__ == "__main__":
     df = pd.DataFrame(input)
     recommender = ClothingRecommender()
     recommender.load_data()
-    recommender.initialize_classifier()
-    #recommendations = recommender.recommend(df)
+    recommender.initialize_clothesmodel()
+    recommendations = recommender.recommend(df)
