@@ -1,7 +1,8 @@
 import os
 import numpy as np
 import pandas as pd
-from transformers import pipeline
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 from pathlib import Path
 from datetime import datetime
 from wear_today.ml_logic.params import *
@@ -33,4 +34,4 @@ def recommend_cloths_for_today(city="Berlin, Germany", today=datetime.now()):
 
 
 if __name__ == "__main__":
-    recommend_cloths()
+    recommend_cloths_for_today()
