@@ -1,9 +1,8 @@
 import os
 import pandas as pd
 
-from transformers import pipeline
-import tensorflow as tf
-import torch
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime, timedelta
 from pathlib import Path
 from params import *
@@ -13,7 +12,7 @@ from utils import *
 class ClothingRecommender:
     """Clothing Recommender Class"""
     def __init__(
-        self, model_name="facebook/bart-large-mnli"):
+        self, model_name="all-MiniLM-L6-v2"):
         self.model_name = model_name
         self.classifier = None
         self.clothing_df = None
@@ -31,14 +30,14 @@ class ClothingRecommender:
         encoding_data_path = os.path.join(current_file.parent.parent, DIR_PREPROC_CLOTHES)
 
         df_accessories = pd.read_csv(
-            os.path.join(encoding_data_path, "classified_accessories.csv")
+            os.path.join(encoding_data_path, "accessories.csv")
         )
         df_shoes = pd.read_csv(
-            os.path.join(encoding_data_path, "classified_shoes.csv")
+            os.path.join(encoding_data_path, "shoes.csv")
         )
-        df_tops = pd.read_csv(os.path.join(encoding_data_path, "classified_top.csv"))
+        df_tops = pd.read_csv(os.path.join(encoding_data_path, "top.csv"))
         df_bottoms = pd.read_csv(
-            os.path.join(encoding_data_path, "classified_bottom.csv")
+            os.path.join(encoding_data_path, "bottom.csv")
         )
 
         self.df_clothes = pd.concat((df_accessories, df_shoes, df_tops, df_bottoms))
