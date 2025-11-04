@@ -1,4 +1,11 @@
 """Clothing Recommender Class"""
+import os
+import pandas as pd
+import numpy as np
+from wear_today.ml_logic.params import *
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+from wear_today.ml_logic.utils import describe_weather
 
 
 class TemperatureRecommender:
@@ -17,6 +24,8 @@ class TemperatureRecommender:
         """
         Load clothing data
         """
+        cwd = os.getcwd()
+
         df_accessories = pd.read_csv(
             os.path.join(DIR_PREPROC_CLOTHES, "accessories.csv")
         )
@@ -159,7 +168,7 @@ class TemperatureRecommender:
             scores = self.call_embedder(input)
 
             # Handle results
-            high_score_ix = scores[::-1][:top_k]
+            high_score_ix = np.argmax(scores)[::-1][:top_k]
             # Build results
             for i in range(top_k):
                 item = sample_df[high_score_ix[i]]
@@ -172,7 +181,7 @@ class TemperatureRecommender:
                         "gender": item["gender"],
                         "details": item["details"],
                         "images": item["product_images"],
-                        "confidence": round(high_scores[ix], 3),
+                        "confidence": round(scores[high_score_ix[i]], 3),
                         "temperature_range": temp_range,
                         "sampled_from_total": f"{len(sample_df)}/{len(wardrobe)} items",
                     }

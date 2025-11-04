@@ -1,13 +1,12 @@
 import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # 0 = all, 1 = INFO, 2 = WARNING, 3 = ERROR
 import numpy as np
 import pandas as pd
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
 from pathlib import Path
 from datetime import datetime
 from wear_today.ml_logic.params import *
 from wear_today.ml_logic.data import *
-from wear_today.ml_logic.weather_sentence import weather_sentence
+from wear_today.ml_logic.utils import describe_weather
 from wear_today.ml_logic.recommender_model import TemperatureRecommender
 from wear_today.ml_logic.weather_model import WeatherPredictor
 
@@ -19,9 +18,9 @@ def recommend_cloths_for_today(city="Berlin, Germany", today=datetime.now()):
     weather_predictor = WeatherPredictor()
     clothing_recommender = TemperatureRecommender()
     clothing_recommender.load_data()
-    weather_prediction = weather_predictor.predict(today)
+    #weather_prediction = weather_predictor.predict(today)
     input = {
-        "time": [datetime.now() + timedelta(hours=i) for i in range(6)],
+        "time": [datetime.now() + datetime.timedelta(hours=i) for i in range(6)],
         "humidity": [60, 50, 50, 50, 60, 70],
         "temperature": [11, 11, 12, 12, 13, 13],
         "wind": [15, 16, 18, 20, 22, 30],
