@@ -11,6 +11,7 @@ import joblib
 
 from wear_today.ml_logic.params import *
 from wear_today.ml_logic.data import *
+from wear_today.ml_logic.utils import *
 
 from pathlib import Path
 
@@ -48,8 +49,11 @@ class WeatherPredictor:
         df_weather_cleaned = clean_data(df_weather)
 
         # Filter Data to only keep data up to the last hour
-        latitude, longitude = get_coords_from_location_name(
+        # latitude, longitude = get_coords_from_location_name(
+        #     location=self.location)
+        latitude, longitude = get_coords_from_location_name_dummy(
             location=self.location)
+
         input_timezone = get_timezone_from_coords(latitude, longitude)
 
         # Check if date is UTC or timezone formatted
@@ -105,7 +109,7 @@ class WeatherPredictor:
         print(Fore.BLUE + "\nLoad latest weather forecast model from Docker image..." + Style.RESET_ALL)
 
         latest_model = load_model(most_recent_model_path, compile=True,
-                                  custom_objects={'mse': losses.MeanSquaredError()})
+                                    custom_objects={'mse': losses.MeanSquaredError()})
 
         print("✅ Model loaded from Docker image")
 
