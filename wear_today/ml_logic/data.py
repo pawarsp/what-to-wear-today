@@ -91,8 +91,7 @@ def get_input_weather_data():
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Clean raw data by
-    - filling missing data with interpolated data
+    Clean raw data by filling missing data with interpolated data
     """
 
     # Interpolate missing data

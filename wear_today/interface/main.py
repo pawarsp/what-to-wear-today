@@ -11,6 +11,10 @@ from wear_today.ml_logic.weather_model import WeatherPredictor
 
 
 def recommend_clothes_for_today(city="Berlin, Germany", today=datetime.now()):
+    """
+    Get clothing recommendation based on city weather for today.
+    """
+
     # receive 12 hour weather prediction
     # obtain clothing recommendation
     print(f"Gathering clothing recommendation for {city}")

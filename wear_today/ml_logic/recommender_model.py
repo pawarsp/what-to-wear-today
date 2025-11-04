@@ -11,7 +11,9 @@ from utils import *
 
 
 class ClothingRecommender:
-    """Clothing Recommender Class"""
+    """
+    Clothing Recommender Class
+    """
     def __init__(
         self, model_name="facebook/bart-large-mnli"):
         self.model_name = model_name
@@ -29,7 +31,7 @@ class ClothingRecommender:
         """
         current_file = Path(__file__).resolve()
         encoding_data_path = os.path.join(current_file.parent.parent, DIR_PREPROC_CLOTHES)
-        
+
         df_accessories = pd.read_csv(
             os.path.join(encoding_data_path, "classified_accessories.csv")
         )
@@ -72,7 +74,9 @@ class ClothingRecommender:
         return self
 
     def _download_and_cache_model(self):
-        """Download and cache the model"""
+        """
+        Download and cache the model
+        """
         model_path = os.path.join(self.cache_dir, "bart-large-mnli")
 
         try:
@@ -116,7 +120,7 @@ class ClothingRecommender:
 
     def call_zero_shot(self, input):
         """
-        calls a zero shot model
+        Call zero-shot classifier
         """
         # Single batch classification (fast!)
         print("⚡ Classifying sampled items in one batch...")
@@ -130,7 +134,7 @@ class ClothingRecommender:
 
     def recommend(self, df_weather, top_k=5, sample_size=200):
         """
-        Ultra-fast recommendation by sampling only 200 random items
+        Recommend clothing based on weather data
         """
         if self.df_clothes is None:
             raise ValueError("No data loaded. Call load_data() first.")
@@ -223,4 +227,3 @@ if __name__ == "__main__":
     recommender.load_data()
     recommender.initialize_classifier()
     #recommendations = recommender.recommend(df)
-
