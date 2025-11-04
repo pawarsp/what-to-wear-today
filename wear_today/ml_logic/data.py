@@ -4,7 +4,7 @@ import openmeteo_requests
 import requests_cache
 from pathlib import Path
 from retry_requests import retry
-from .utils import get_coords_from_location_name, get_timezone_from_coords
+from .utils import get_coords_from_location_name, get_timezone_from_coords, get_coords_from_location_name_dummy
 from .params import *
 
 
@@ -19,7 +19,7 @@ def get_meteo_data_with_cache(
     Returns a pandas.DataFrame
     """
 
-    latitude, longitude = get_coords_from_location_name(location)
+    latitude, longitude = get_coords_from_location_name_dummy(location)
     timezone = get_timezone_from_coords(latitude, longitude)
 
     current_file = Path(__file__).resolve()
