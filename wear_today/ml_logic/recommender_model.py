@@ -1,11 +1,12 @@
 import os
 import pandas as pd
+import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime, timedelta
 from pathlib import Path
-from params import *
-from utils import *
+from wear_today.ml_logic.params import *
+from wear_today.ml_logic.utils import *
 
 
 class ClothingRecommender:
@@ -19,7 +20,7 @@ class ClothingRecommender:
 
         current_file = Path(__file__).resolve()
         root_dir = current_file.parent.parent.parent
-        self.cache_dir= os.path.join(root_dir, MODEL_DIR)
+        self.cache_dir= os.path.join(root_dir, MODELS_DIRECTORY)
         os.makedirs(self.cache_dir, exist_ok=True)
 
     def load_data(self):
@@ -179,10 +180,11 @@ class ClothingRecommender:
             scores = self.call_embedder(input)
 
             # Handle results
-            high_score_ix = np.argmax(scores)[::-1][:top_k]
+            high_score_ix = np.argsort(scores)[::-1][:top_k]
             # Build results
             for i in range(top_k):
-                item = sample_df[high_score_ix[i]]
+                print(i)
+                item = sample_df.iloc[high_score_ix[i]]
                 recommendations.append(
                     {
                         "category": clo_cat,
@@ -214,3 +216,4 @@ if __name__ == "__main__":
     recommender.load_data()
     recommender.initialize_clothesmodel()
     recommendations = recommender.recommend(df)
+    print(recommendations)
