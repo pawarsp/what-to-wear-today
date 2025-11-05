@@ -40,13 +40,20 @@ def get_coords_from_location_name_dummy(location: str = "Berlin, Germany"):
 
 
 def get_timezone_from_coords(latitude, longitude):
+    """
+    Translates (latitude, longitude) into timezone name like "Europe/Berlin"
+    """
+
     tf = TimezoneFinder()
     tz_name = tf.timezone_at(lat=latitude, lng=longitude)
     return tz_name
 
 
 def describe_by_threshold(value, thresholds):
-    """Return the first matching description based on threshold values."""
+    """
+    Return the first matching description based on threshold values.
+    """
+
     for limit, desc in thresholds:
         if value < limit:
             return desc
@@ -54,6 +61,10 @@ def describe_by_threshold(value, thresholds):
 
 
 def describe_weather(weather_info: dict):
+    """
+    Generate a natural language description of the weather conditions.
+    """
+
     time = weather_info["time"].hour
     hum = weather_info["humidity"]
     humid = describe_by_threshold(

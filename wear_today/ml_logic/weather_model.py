@@ -16,15 +16,21 @@ from wear_today.ml_logic.utils import *
 from pathlib import Path
 
 
-"""Weather Predictor Class"""
-
 
 class WeatherPredictor:
+    """
+    Weather Predictor Class
+    """
+
     def __init__(self, location='Berlin, Germany', today=datetime.now()):
         self.location = location
         self.today = today
 
     def describe_now(self):
+        """
+        Print a description of the current date, time and location
+        """
+
         date_str = self.today.strftime("%A %d %B %Y")
         time_str = self.today.strftime("%H:%M:%S")
         location = self.location
@@ -33,10 +39,11 @@ class WeatherPredictor:
                 Let's forecast the weather data for the next 12 hours in {location}.")
 
     def load_and_clean_last_data(self, input_hours=INPUT_LENGTH) -> pd.DataFrame:
-        '''
+        """
         Load latest data for input_length/24 days before today
         Return a clean dataset and the last known timestamp
-        '''
+        """
+
         # Convert nb of hours from input_hours into nb of inopout days to load
         input_length_days = input_hours // 24 + 1 * (input_hours % 24 > 0)
 
@@ -84,9 +91,10 @@ class WeatherPredictor:
         return df_weather_filtered, last_known_date
 
     def load_model(self):
-        '''Get the latest model of the weather predictor.
+        """
+        Get the latest model of the weather predictor.
         Return None if no model found
-        '''
+        """
 
         # Get the latest model version name by the timestamp
         # import ipdb; ipdb.set_trace()
@@ -116,11 +124,12 @@ class WeatherPredictor:
         return latest_model
 
     def preprocessing(self, raw_data: pd.DataFrame) -> pd.DataFrame:
-        '''
+        """
         Transform datetime date into cyclical features for Hour, day of week and day of year
         Drop date column
         Return preprocessed dataframe
-        '''
+        """
+
         df = raw_data.copy()
         weather_date = pd.to_datetime(df["date"])
 
@@ -147,6 +156,7 @@ class WeatherPredictor:
         Predict weather for the next hours using the latest trained LSTM model.
         Returns predictions in original scale (unscaled).
         """
+
         # Load model
         model = self.load_model()
         if model is None:
@@ -199,13 +209,17 @@ class WeatherPredictor:
         return df_pred
 
     def save_model(self):
+        """
+        Save the current model locally.
+        """
         pass
 
     def load_scaler(self):
-        '''Get the latest target scaler used in the latest trained model.
+        """
+        Get the latest target scaler used in the latest trained model.
         Necessary for unscaling prediction from weather forecast model.
         Return None if no scaler found
-        '''
+        """
 
         # Get the latest scaler version name by the timestamp
         current_file = Path(__file__).resolve()
@@ -231,6 +245,9 @@ class WeatherPredictor:
         return latest_scaler
 
     def save_scaler(self):
+        """
+        Save the current target scaler locally.
+        """
         pass
 
 

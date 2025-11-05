@@ -10,7 +10,9 @@ from wear_today.ml_logic.utils import *
 
 
 class ClothingRecommender:
-    """Clothing Recommender Class"""
+    """
+    Clothing Recommender Class
+    """
     def __init__(
         self, model_name="all-MiniLM-L6-v2"):
         self.model_name = model_name
@@ -70,7 +72,9 @@ class ClothingRecommender:
         return self
 
     def _download_and_cache_model(self):
-        """Download and cache the model"""
+        """
+        Download and cache the model
+        """
         model_path = os.path.join(self.cache_dir, "all-MiniLM-L6-v2")
 
         try:
@@ -111,7 +115,7 @@ class ClothingRecommender:
 
     def call_embedder(self, input):
         """
-        calls a sentence embedding model and returns scores
+        Calls a sentence embedding model and returns scores
         """
         # Single batch classification (fast!)
         print("⚡ Classifying sampled items in one batch...")
@@ -122,7 +126,7 @@ class ClothingRecommender:
 
     def recommend(self, df_weather, top_k=5, sample_size=200):
         """
-        Ultra-fast recommendation by sampling only 200 random items
+        Recommend clothing based on weather data
         """
         if self.df_clothes is None:
             raise ValueError("No data loaded. Call load_data() first.")
