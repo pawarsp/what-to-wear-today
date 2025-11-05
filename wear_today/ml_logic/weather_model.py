@@ -16,7 +16,6 @@ from wear_today.ml_logic.utils import *
 from pathlib import Path
 
 
-
 class WeatherPredictor:
     """
     Weather Predictor Class
@@ -61,7 +60,7 @@ class WeatherPredictor:
         _, _, input_timezone = get_coords_from_location_name_dummy(
             location=self.location)
         print(input_timezone)
-        #input_timezone = get_timezone_from_coords(latitude, longitude)
+        # input_timezone = get_timezone_from_coords(latitude, longitude)
 
         # Check if date is UTC or timezone formatted
         if df_weather_cleaned["date"].dt.tz is None:
@@ -117,7 +116,7 @@ class WeatherPredictor:
         print(Fore.BLUE + "\nLoad latest weather forecast model from Docker image..." + Style.RESET_ALL)
 
         latest_model = load_model(most_recent_model_path, compile=True,
-                                    custom_objects={'mse': losses.MeanSquaredError()})
+                                  custom_objects={'mse': losses.MeanSquaredError()})
 
         print("✅ Model loaded from Docker image")
 
@@ -203,6 +202,10 @@ class WeatherPredictor:
                                  )
         df_pred = df_pred[['time', 'humidity', 'temperature', 'wind', 'rain']]
 
+        # Avoid negative predictions by setting them at 0
+        df_pred[['humidity', 'temperature', 'wind', 'rain']] = df_pred[[
+            'humidity', 'temperature', 'wind', 'rain']].clip(lower=0)
+
         print(
             Fore.GREEN + f"✅ Prediction completed with shape {y_pred_original.shape}" + Style.RESET_ALL)
 
@@ -252,7 +255,8 @@ class WeatherPredictor:
 
 
 if __name__ == "__main__":
-    predictor = WeatherPredictor(location = 'Berlin, Germany')  # ensuite tester en changeant date
+    # ensuite tester en changeant date
+    predictor = WeatherPredictor(location='Berlin, Germany')
     predictions = predictor.predict()
     if predictions is not None:
         print(predictions)
