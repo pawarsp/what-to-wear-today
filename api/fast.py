@@ -36,8 +36,9 @@ def predict(city: str):
 
     # TODO: feed it to your model.predict, and return the output
 
-    weather_prediction, recommended_clothing = recommend_clothes_for_today(
+    output_dict = recommend_clothes_for_today(
         city=city, today=datetime.today().date()
     )
 
-    return f"Today in {city} for {weather_prediction}, my recommendation for your clothing is: {recommended_clothing}"
+
+    return output_dict
