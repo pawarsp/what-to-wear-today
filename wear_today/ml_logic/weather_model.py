@@ -51,10 +51,10 @@ class WeatherPredictor:
         # Filter Data to only keep data up to the last hour
         # latitude, longitude = get_coords_from_location_name(
         #     location=self.location)
-        latitude, longitude = get_coords_from_location_name_dummy(
+        _, _, input_timezone = get_coords_from_location_name_dummy(
             location=self.location)
-
-        input_timezone = get_timezone_from_coords(latitude, longitude)
+        print(input_timezone)
+        #input_timezone = get_timezone_from_coords(latitude, longitude)
 
         # Check if date is UTC or timezone formatted
         if df_weather_cleaned["date"].dt.tz is None:
