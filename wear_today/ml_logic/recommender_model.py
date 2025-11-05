@@ -174,7 +174,6 @@ class ClothingRecommender:
             high_score_ix = np.argsort(scores)[::-1][:top_k]
             # Build results
             for i in range(top_k):
-                print(i)
                 item = sample_df.iloc[high_score_ix[i]]
                 recommendations.append(
                     {
