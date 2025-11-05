@@ -206,7 +206,7 @@ if __name__ == "__main__":
     }
     df = pd.DataFrame(input)
     recommender = ClothingRecommender()
-    recommender.load_data()
     recommender.initialize_clothesmodel()
+    recommender.load_data()
     recommendations = recommender.recommend(df)
     print(recommendations)
