@@ -159,16 +159,7 @@ class ClothingRecommender:
             # Prepare texts from sampled items
             clothing_info = []
             for idx, row in sample_df.iterrows():
-                label = " ".join(
-                    [
-                        "product name:",
-                        row["product_name"],
-                        "; keywords:",
-                        row["text_complex"],
-                        "; suitable for",
-                        row["weather_label"],
-                    ]
-                )
+                label = row['text_complex']
                 clothing_info.append(label)
 
             # Single batch classification (fast!)
@@ -196,6 +187,9 @@ class ClothingRecommender:
                         "images": item["product_images"],
                         "confidence": round(scores[high_score_ix[i]], 3),
                         "temperature_range": temp_range,
+                        "humidity_range": humid_range,
+                        "windspeed_range": wind_range,
+                        "rainfall_range": rain_range,
                         "sampled_from_total": f"{len(sample_df)}/{len(wardrobe)} items",
                     }
                 )
