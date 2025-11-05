@@ -1,26 +1,26 @@
 import os
 import pandas as pd
-
-from transformers import pipeline
-import tensorflow as tf
-import torch
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime, timedelta
 from pathlib import Path
-from params import *
-from utils import *
+from wear_today.ml_logic.params import *
+from wear_today.ml_logic.utils import *
 
 
 class ClothingRecommender:
     """Clothing Recommender Class"""
     def __init__(
-        self, model_name="facebook/bart-large-mnli"):
+        self, model_name="all-MiniLM-L6-v2"):
         self.model_name = model_name
         self.classifier = None
         self.clothing_df = None
+        self.embedder = None
 
         current_file = Path(__file__).resolve()
         root_dir = current_file.parent.parent.parent
-        self.cache_dir= os.path.join(root_dir, MODEL_DIR)
+        self.cache_dir= os.path.join(root_dir, MODELS_DIRECTORY)
         os.makedirs(self.cache_dir, exist_ok=True)
 
     def load_data(self):
@@ -29,16 +29,16 @@ class ClothingRecommender:
         """
         current_file = Path(__file__).resolve()
         encoding_data_path = os.path.join(current_file.parent.parent, DIR_PREPROC_CLOTHES)
-        
+
         df_accessories = pd.read_csv(
-            os.path.join(encoding_data_path, "classified_accessories.csv")
+            os.path.join(encoding_data_path, "accessories.csv")
         )
         df_shoes = pd.read_csv(
-            os.path.join(encoding_data_path, "classified_shoes.csv")
+            os.path.join(encoding_data_path, "shoes.csv")
         )
-        df_tops = pd.read_csv(os.path.join(encoding_data_path, "classified_top.csv"))
+        df_tops = pd.read_csv(os.path.join(encoding_data_path, "top.csv"))
         df_bottoms = pd.read_csv(
-            os.path.join(encoding_data_path, "classified_bottom.csv")
+            os.path.join(encoding_data_path, "bottom.csv")
         )
 
         self.df_clothes = pd.concat((df_accessories, df_shoes, df_tops, df_bottoms))
@@ -46,21 +46,19 @@ class ClothingRecommender:
         print(f"✅ Loaded {len(self.df_clothes)} clothing items")
         return self
 
-    def initialize_classifier(self):
+    def initialize_clothesmodel(self):
         """
-        Initialize the zero-shot classifier with caching
+        Initialize the sentence embedding model with caching
         """
-        if self.classifier is not None:
+        if self.embedder is not None:
             return self
 
-        model_path = os.path.join(self.cache_dir, "bart-large-mnli")
-
+        model_path = os.path.join(self.cache_dir, "all-MiniLM-L6-v2")
+        print(model_path)
         if os.path.exists(model_path):
             print("📂 Loading cached model...")
             try:
-                self.classifier = pipeline(
-                    "zero-shot-classification", model=model_path, device=-1
-                )
+                self.embedder = SentenceTransformer(model_path)
                 print("✅ Cached model loaded successfully!")
             except Exception as e:
                 print(f"⚠️  Error loading cached model, downloading fresh: {e}")
@@ -73,17 +71,14 @@ class ClothingRecommender:
 
     def _download_and_cache_model(self):
         """Download and cache the model"""
-        model_path = os.path.join(self.cache_dir, "bart-large-mnli")
+        model_path = os.path.join(self.cache_dir, "all-MiniLM-L6-v2")
 
         try:
-            self.classifier = pipeline(
-                "zero-shot-classification", model=self.model_name, device=-1
-            )
+            self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
             # Save to cache
             print("💾 Saving model to cache...")
-            self.classifier.model.save_pretrained(model_path)
-            self.classifier.tokenizer.save_pretrained(model_path)
+            self.embedder.save(model_path)
             print(f"✅ Model cached at: {model_path}")
 
         except Exception as e:
@@ -114,19 +109,16 @@ class ClothingRecommender:
         except ValueError:
             raise ValueError(f"Invalid temperature: {temperature}. Please enter 5-30.")
 
-    def call_zero_shot(self, input):
+    def call_embedder(self, input):
         """
-        calls a zero shot model
+        calls a sentence embedding model and returns scores
         """
         # Single batch classification (fast!)
         print("⚡ Classifying sampled items in one batch...")
-        results = self.classifier(
-            input["texts"],
-            candidate_labels=input["labels"],
-            hypothesis_template=input["hypothesis"],
-            multi_label=False,
-        )
-        return results
+        clothing_emb = self.embedder.encode(input["clothes"])
+        weather_emb = self.embedder.encode(input['weather'])
+        scores = cosine_similarity([weather_emb], clothing_emb)[0]
+        return scores
 
     def recommend(self, df_weather, top_k=5, sample_size=200):
         """
@@ -135,7 +127,7 @@ class ClothingRecommender:
         if self.df_clothes is None:
             raise ValueError("No data loaded. Call load_data() first.")
 
-        self.initialize_classifier()
+        self.initialize_clothesmodel()
 
         temp_range = [min(df_weather["temperature"]), max(df_weather["temperature"])]
         humid_range = [min(df_weather["wind"]), max(df_weather["wind"])]
@@ -145,13 +137,13 @@ class ClothingRecommender:
         print(f"    wind speed of {wind_range[0]}m/s - {wind_range[1]}m/s,")
         print(f"    humidity between {humid_range[0]}% and {humid_range[1]}%,")
         print(f"    and rainfall of max. {rain_range[1]}mm.")
-        weather_sentences = describe_weather(
+        weather_sentence = describe_weather(
             df_weather.iloc[0]
         )  # TODO: we currently have a sentence for each of the 12 hours of forecast, but only feed 1 to the model
 
         # give recommendations for top, bottom, shoes, and accessories
         recommendations = []
-        for clo_cat in self.df_clothes.category_type.unique():
+        for clo_cat in self.df_clothes['category_type'].unique():
             mask = self.df_clothes["category_type"] == clo_cat
             wardrobe = self.df_clothes[mask]
             # RANDOM SAMPLE - This is the key speed improvement!
@@ -165,44 +157,38 @@ class ClothingRecommender:
                 print(f"🎯 Using all {len(sample_df)} items")
 
             # Prepare texts from sampled items
-            labels = []
+            clothing_info = []
             for idx, row in sample_df.iterrows():
-                label = " ".join(
-                    [
-                        "product name:",
-                        row["product_name"],
-                        "; keywords:",
-                        row["text"],
-                        "; suitable for",
-                        row["weather_label"],
-                    ]
-                )
-                labels.append(label)
+                label = row['text_complex']
+                clothing_info.append(label)
 
             # Single batch classification (fast!)
             input = {
-                "texts": weather_sentences,  # TODO: we currently have a sentence for each of the 12 hours of forecast, but only feed 1 to the model
-                "labels": labels,
-                "hypothesis": "Oh no, I need to go outside for the next 12 hours. What should I wear? Maybe '{}' is a good suggestion to best the weather?",
+                "weather": weather_sentence,  # TODO: we currently have a sentence for each of the 12 hours of forecast, but only feed 1 to the model
+                "clothes": clothing_info,
             }
 
-            results = self.call_zero_shot(input)
+            scores = self.call_embedder(input)
 
             # Handle results
-            scores = results["scores"]
-            high_scores = scores[:top_k]
+            high_score_ix = np.argsort(scores)[::-1][:top_k]
             # Build results
-            for ix, val in enumerate(high_scores):
-                item_ix = labels.index(results["labels"][ix])
-                item = sample_df.iloc[item_ix]
+            for i in range(top_k):
+                item = sample_df.iloc[high_score_ix[i]]
                 recommendations.append(
                     {
                         "category": clo_cat,
-                        "rank": ix + 1,
+                        "rank": i + 1,
                         "product_name": item["product_name"],
+                        "product_id": item["product_id"],
+                        "gender": item["gender"],
                         "details": item["details"],
-                        "confidence": round(high_scores[ix], 3),
+                        "images": item["product_images"],
+                        "confidence": round(scores[high_score_ix[i]], 3),
                         "temperature_range": temp_range,
+                        "humidity_range": humid_range,
+                        "windspeed_range": wind_range,
+                        "rainfall_range": rain_range,
                         "sampled_from_total": f"{len(sample_df)}/{len(wardrobe)} items",
                     }
                 )
@@ -221,6 +207,6 @@ if __name__ == "__main__":
     df = pd.DataFrame(input)
     recommender = ClothingRecommender()
     recommender.load_data()
-    recommender.initialize_classifier()
-    #recommendations = recommender.recommend(df)
-
+    recommender.initialize_clothesmodel()
+    recommendations = recommender.recommend(df)
+    print(recommendations)
