@@ -30,16 +30,9 @@ def predict(city: str):
 
     # TODO: feed it to your model.predict, and return the output
 
-    # X_pred = dict(
-    #         day=str(datetime.today().date()),
-    #         city=city)
-    # index=[0])
-    # model = load_model() #function to be confirmed
-    # assert model is not None
-    weather_prediction, recommended_clothing = recommend_clothes_for_today(
+    output_dict = recommend_clothes_for_today(
         city=city, today=datetime.today().date()
     )
-    # y_pred = X_pred['day']
-    # app.state.model.predict(X_pred)
 
-    return f"Today in {city} for {weather_prediction}, my recommendation for your clothing is: {recommended_clothing}"
+
+    return output_dict
