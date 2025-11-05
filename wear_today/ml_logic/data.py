@@ -19,8 +19,8 @@ def get_meteo_data_with_cache(
     Returns a pandas.DataFrame
     """
 
-    latitude, longitude = get_coords_from_location_name_dummy(location)
-    timezone = get_timezone_from_coords(latitude, longitude)
+    latitude, longitude, timezone = get_coords_from_location_name_dummy(location)
+    #timezone = get_timezone_from_coords(latitude, longitude)
 
     current_file = Path(__file__).resolve()
     root_dir = current_file.parent.parent.parent

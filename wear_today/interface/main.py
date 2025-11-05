@@ -1,7 +1,7 @@
 import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # 0 = all, 1 = INFO, 2 = WARNING, 3 = ERROR
 import numpy as np
 import pandas as pd
-from transformers import pipeline
 from pathlib import Path
 from datetime import datetime
 from wear_today.ml_logic.params import *
