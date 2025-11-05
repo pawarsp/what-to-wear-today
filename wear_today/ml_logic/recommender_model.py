@@ -10,7 +10,9 @@ from wear_today.ml_logic.utils import *
 
 
 class ClothingRecommender:
-    """Clothing Recommender Class"""
+    """
+    Clothing Recommender Class
+    """
     def __init__(
         self, model_name="all-MiniLM-L6-v2"):
         self.model_name = model_name
@@ -20,7 +22,7 @@ class ClothingRecommender:
 
         current_file = Path(__file__).resolve()
         root_dir = current_file.parent.parent.parent
-        self.cache_dir= os.path.join(root_dir, MODELS_DIRECTORY)
+        self.cache_dir = os.path.join(root_dir, MODELS_DIRECTORY)
         os.makedirs(self.cache_dir, exist_ok=True)
 
     def load_data(self):
@@ -44,6 +46,23 @@ class ClothingRecommender:
         self.df_clothes = pd.concat((df_accessories, df_shoes, df_tops, df_bottoms))
 
         print(f"✅ Loaded {len(self.df_clothes)} clothing items")
+        '''if embeddings file exists load embeddings,
+        otherwise save embeddings'''
+
+        self.clothes_embeddings = {}
+        for clothes_cat in self.df_clothes['category_type'].unique():
+            file_path = os.path.join(encoding_data_path, f"embeddings_{clothes_cat}.npy")
+            if os.path.exists(file_path):
+                print(f"✅ Loading wardrobe embeddings for {clothes_cat}!")
+                self.clothes_embeddings[clothes_cat] = np.load(file_path)
+            else:
+                print(f"✅ Embedding wardrobe for {clothes_cat}!")
+                mask = list(self.df_clothes['category_type'] == clothes_cat)
+                self.clothes_embeddings[clothes_cat] = self.embedder.encode(
+                    self.df_clothes.iloc[mask]['text_complex']
+                    )
+                np.save(file_path, self.clothes_embeddings[clothes_cat])
+
         return self
 
     def initialize_clothesmodel(self):
@@ -70,7 +89,9 @@ class ClothingRecommender:
         return self
 
     def _download_and_cache_model(self):
-        """Download and cache the model"""
+        """
+        Download and cache the model
+        """
         model_path = os.path.join(self.cache_dir, "all-MiniLM-L6-v2")
 
         try:
@@ -111,18 +132,18 @@ class ClothingRecommender:
 
     def call_embedder(self, input):
         """
-        calls a sentence embedding model and returns scores
+        Calls a sentence embedding model and returns scores
         """
         # Single batch classification (fast!)
         print("⚡ Classifying sampled items in one batch...")
-        clothing_emb = self.embedder.encode(input["clothes"])
+        # clothing_emb = self.embedder.encode(input["clothes"])
         weather_emb = self.embedder.encode(input['weather'])
-        scores = cosine_similarity([weather_emb], clothing_emb)[0]
+        scores = cosine_similarity([weather_emb], input['clothes_emb'])[0]
         return scores
 
     def recommend(self, df_weather, top_k=5, sample_size=200):
         """
-        Ultra-fast recommendation by sampling only 200 random items
+        Recommend clothing based on weather data
         """
         if self.df_clothes is None:
             raise ValueError("No data loaded. Call load_data() first.")
@@ -148,24 +169,22 @@ class ClothingRecommender:
             wardrobe = self.df_clothes[mask]
             # RANDOM SAMPLE - This is the key speed improvement!
             if len(wardrobe) > sample_size:
-                sample_df = wardrobe.sample(sample_size)  # , random_state=42)
+                sample_idx = np.random.choice(wardrobe.index, size=sample_size, replace=False)
                 print(
                     f"🎯 Sampling {sample_size} random items from {len(wardrobe)} total items"
                 )
             else:
-                sample_df = wardrobe
-                print(f"🎯 Using all {len(sample_df)} items")
+                sample_idx = np.random.choice(wardrobe.index, size=len(wardrobe), replace=False)
+                print(f"🎯 Using all {len(wardrobe)} items")
 
-            # Prepare texts from sampled items
-            clothing_info = []
-            for idx, row in sample_df.iterrows():
-                label = row['text_complex']
-                clothing_info.append(label)
+            # select corresponding rows from embeddings
+            sample_df = wardrobe.iloc[sample_idx]
+            clothes_emb_sample = self.clothes_embeddings[clo_cat][sample_idx,:]
 
             # Single batch classification (fast!)
             input = {
                 "weather": weather_sentence,  # TODO: we currently have a sentence for each of the 12 hours of forecast, but only feed 1 to the model
-                "clothes": clothing_info,
+                "clothes_emb": clothes_emb_sample,
             }
 
             scores = self.call_embedder(input)
@@ -180,7 +199,6 @@ class ClothingRecommender:
                         "category": clo_cat,
                         "rank": i + 1,
                         "product_name": item["product_name"],
-                        "product_id": item["product_id"],
                         "gender": item["gender"],
                         "details": item["details"],
                         "images": item["product_images"],
@@ -206,7 +224,7 @@ if __name__ == "__main__":
     }
     df = pd.DataFrame(input)
     recommender = ClothingRecommender()
-    recommender.load_data()
     recommender.initialize_clothesmodel()
+    recommender.load_data()
     recommendations = recommender.recommend(df)
     print(recommendations)
