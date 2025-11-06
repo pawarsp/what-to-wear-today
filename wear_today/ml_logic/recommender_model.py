@@ -151,17 +151,21 @@ class ClothingRecommender:
 
         self.initialize_clothesmodel()
 
-        temp_range = [min(df_weather["temperature"]), max(df_weather["temperature"])]
-        humid_range = [min(df_weather["wind"]), max(df_weather["wind"])]
-        wind_range = [min(df_weather["humidity"]), max(df_weather["humidity"])]
-        rain_range = [min(df_weather["rain"]), max(df_weather["rain"])]
+        temp_range = [round(min(df_weather["temperature"]), 0), round(max(df_weather["temperature"]), 0)]
+        humid_range = [round(min(df_weather["wind"]), 0), round(max(df_weather["wind"]), 0)]
+        wind_range = [round(min(df_weather["humidity"]), 0), round(max(df_weather["humidity"]), 0)]
+        rain_range = [round(min(df_weather["rain"]), 0), round(max(df_weather["rain"]), 0)]
         print(f"🔍 Finding best clothing for {temp_range[0]}°C - {temp_range[1]}°C,")
         print(f"    wind speed of {wind_range[0]}m/s - {wind_range[1]}m/s,")
         print(f"    humidity between {humid_range[0]}% and {humid_range[1]}%,")
         print(f"    and rainfall of max. {rain_range[1]}mm.")
-        weather_sentence = describe_weather(
-            df_weather.iloc[0]
-        )  # TODO: we currently have a sentence for each of the 12 hours of forecast, but only feed 1 to the model
+
+        aggregated_weather = {"temperature": np.median(df_weather["temperature"]),
+                              "wind": max(df_weather["wind"]),
+                              "humidity": np.median(df_weather["humidity"]),
+                              "rain": max(df_weather["rain"]),
+                              "time": df_weather["time"].iloc[0]}
+        weather_sentence = describe_weather(aggregated_weather)
 
         # give recommendations for top, bottom, shoes, and accessories
         recommendations = []
@@ -184,7 +188,7 @@ class ClothingRecommender:
 
             # Single batch classification (fast!)
             input = {
-                "weather": weather_sentence,  # TODO: we currently have a sentence for each of the 12 hours of forecast, but only feed 1 to the model
+                "weather": weather_sentence,
                 "clothes_emb": clothes_emb_sample,
             }
 
