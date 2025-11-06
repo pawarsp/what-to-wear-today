@@ -47,7 +47,11 @@ def recommend_clothes_for_today(city="Berlin", today=datetime.now()):
             "accessories": recommended_clothing_dict["product_name"][0],
             "shoes": recommended_clothing_dict["product_name"][1],
             "top": recommended_clothing_dict["product_name"][2],
-            "bottom": recommended_clothing_dict["product_name"][3]
+            "bottom": recommended_clothing_dict["product_name"][3],
+            "accessories_link": recommended_clothing_dict["links"][0],
+            "shoes_link": recommended_clothing_dict["links"][1],
+            "top_link": recommended_clothing_dict["links"][2],
+            "bottom_link": recommended_clothing_dict["links"][3]
         }
     }
 
