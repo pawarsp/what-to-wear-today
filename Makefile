@@ -113,3 +113,4 @@ docker_deploy:
 		--image $(DOCKER_IMAGE_PATH):prod \
 		--memory $(GAR_MEMORY) \
 		--region $(GCP_REGION) \
+		--allow-unauthenticated

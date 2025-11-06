@@ -37,8 +37,8 @@ def predict(city: str):
     # TODO: feed it to your model.predict, and return the output
 
     output_dict = recommend_clothes_for_today(
-        city=city, today=datetime.today().date()
+        city=city
     )
-
+    
 
     return output_dict
