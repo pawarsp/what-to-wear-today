@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
+import re
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime, timedelta
@@ -208,6 +209,7 @@ class ClothingRecommender:
                         "windspeed_range": wind_range,
                         "rainfall_range": rain_range,
                         "sampled_from_total": f"{len(sample_df)}/{len(wardrobe)} items",
+                        "links": re.findall(r"\{'(.*?)': ", item['product_images']),
                     }
                 )
 
