@@ -1,4 +1,5 @@
 # what-to-wear-today
+What-to-wear-today is the app that ends your morning struggle. It estimates the weather for the next 12 hours for your current location and overrides your wardrobe malfunction. No more choosing! Get recommended 4 items for your head, feet, legs, and chest to dress for any occasion. Whether hail, sleet, snow, or sunshine: You are prepared!
 
 ML-powered All Weather Clothing Recommender
 
