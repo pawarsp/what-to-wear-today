@@ -195,6 +195,13 @@ class ClothingRecommender:
             # Build results
             for i in range(top_k):
                 item = sample_df.iloc[high_score_ix[i]]
+                working_link = []
+                links = re.findall(r"\{'(.*?)': ", item['product_images'])
+                for link in links:
+                    if link_is_working(link):
+                        working_link = link
+                        break
+
                 recommendations.append(
                     {
                         "category": clo_cat,
@@ -209,7 +216,7 @@ class ClothingRecommender:
                         "windspeed_range": wind_range,
                         "rainfall_range": rain_range,
                         "sampled_from_total": f"{len(sample_df)}/{len(wardrobe)} items",
-                        "links": re.findall(r"\{'(.*?)': ", item['product_images']),
+                        "link": working_link,
                     }
                 )
 
