@@ -36,7 +36,10 @@ def recommend_clothes_for_today(city="Berlin", today=datetime.now()):
     weather_prediction_dict = weather_prediction.to_dict(orient="list")
     recommended_clothing_dict = recommended_clothing.to_dict(orient="list")
 
+    times = weather_prediction_dict["time"]
+
     weather_clothes_dict = {
+        "time": [f"{t.hour:02d}:{t.minute:02d}" for t in times],
         "temperature": list(np.round(weather_prediction_dict["temperature"], 2)),
         "rain": list(np.round(weather_prediction_dict["rain"], 2)),
         "humidity": list(np.round(weather_prediction_dict["humidity"], 2)),
@@ -50,7 +53,6 @@ def recommend_clothes_for_today(city="Berlin", today=datetime.now()):
             "bottom": recommended_clothing_dict["product_name"][3]
         }
     }
-
     return weather_clothes_dict
 
 
