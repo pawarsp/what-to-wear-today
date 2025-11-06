@@ -10,15 +10,23 @@ from wear_today.ml_logic.recommender_model import ClothingRecommender
 from wear_today.ml_logic.weather_model import WeatherPredictor
 
 
-def recommend_clothes_for_today(city="Berlin, Germany", today=datetime.now()):
+def recommend_clothes_for_today(city="Berlin", today=datetime.now()):
     """
     Get clothing recommendation based on city weather for today.
     """
+    city_country = {
+        "london": "London, United Kingdom",
+        "berlin": "Berlin, Germany",
+        "porto": "Porto, Portugal",
+        "marseille": "Marseille, France",
+    }
+    city_name = city_country[city.lower()]
 
     # receive 12 hour weather prediction
     # obtain clothing recommendation
-    print(f"Gathering clothing recommendation for {city}")
-    weather_predictor = WeatherPredictor(location=city)#location = city, today = today)
+    print(f"Gathering clothing recommendation for {city_name}")
+
+    weather_predictor = WeatherPredictor(location=city_name)
     clothing_recommender = ClothingRecommender()
     clothing_recommender.initialize_clothesmodel()
     clothing_recommender.load_data()
@@ -47,4 +55,4 @@ def recommend_clothes_for_today(city="Berlin, Germany", today=datetime.now()):
 
 
 if __name__ == "__main__":
-    recommend_clothes_for_today()
+    weather_clothes_dict = recommend_clothes_for_today('london')
