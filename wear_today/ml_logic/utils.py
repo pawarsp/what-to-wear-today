@@ -2,6 +2,7 @@ from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 from datetime import datetime, timedelta
 import pandas as pd
+import requests
 
 
 def get_coords_from_location_name(location: str = "Berlin, Germany", timeout: int = 5):
@@ -124,3 +125,17 @@ def describe_weather(weather_info: dict):
     sn += f"The air feels {humid} with {hum} % humidity, it is {raining}."
 
     return sn
+
+
+def link_is_working(url):
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/128.0.0.0 Safari/537.36"
+        )}
+    try:
+        response = requests.head(url, headers=headers, allow_redirects=True, timeout=5)
+        return response.status_code < 400
+    except requests.RequestException:
+        return False
